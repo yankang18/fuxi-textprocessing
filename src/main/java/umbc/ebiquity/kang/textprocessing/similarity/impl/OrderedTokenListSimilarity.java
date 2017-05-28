@@ -2,12 +2,17 @@ package umbc.ebiquity.kang.textprocessing.similarity.impl;
 
 import java.util.List;
 
-import umbc.ebiquity.kang.textprocessing.similarity.IWordListSimilarity;
+import umbc.ebiquity.kang.textprocessing.similarity.ITokenListSimilarity;
 
-public class OrderedWordListSimilarity implements IWordListSimilarity {
+public class OrderedTokenListSimilarity implements ITokenListSimilarity {
 
 	@Override
 	public double computeSimilarity(List<String> wordList1, List<String> wordList2) {
+		
+		if (wordList1 == null || wordList2 == null) {
+			return 0.0;
+		}
+
 		if (wordList1.size() == 0 || wordList2.size() == 0) {
 			return 0.0;
 		}
@@ -21,7 +26,8 @@ public class OrderedWordListSimilarity implements IWordListSimilarity {
 				matchedWordCount++;
 			}
 		}
-		double relationMatchScore = (double) matchedWordCount / (((double) wordListSize1 + (double) wordListSize2) * 0.5);
+		double relationMatchScore = (double) matchedWordCount
+				/ (((double) wordListSize1 + (double) wordListSize2) * 0.5);
 		return relationMatchScore;
 	}
 

@@ -2,47 +2,58 @@ package umbc.ebiquity.kang.textprocessing.similarity.impl;
 
 import java.util.List;
 
-import umbc.ebiquity.kang.textprocessing.similarity.ILabelSimilarity;
-import umbc.ebiquity.kang.textprocessing.similarity.IWordListSimilarity;
+import uk.ac.shef.wit.simmetrics.similaritymetrics.QGramsDistance;
+import uk.ac.shef.wit.simmetrics.tokenisers.TokeniserQGram3Extended;
+import umbc.ebiquity.kang.textprocessing.similarity.AbstractTwoLevelLabelSimilarity;
+import umbc.ebiquity.kang.textprocessing.similarity.ITokenListSimilarity;
 import umbc.ebiquity.kang.textprocessing.util.TextProcessingUtils;
 
-public class EqualStemBoostingLabelSimilarity implements ILabelSimilarity {
+public class EqualStemBoostingLabelSimilarity extends AbstractTwoLevelLabelSimilarity {
 
-	private IWordListSimilarity _wordListSimilarity;
-	private IWordListSimilarity _equalSemanticRootWordListSimilarity = new EqualStemWordListSimilarity();
-	private boolean _penalize = true;
+	private ITokenListSimilarity stemWordBasedListSimilarity = new StemWordBasedTokenListSimilarity();
+	private boolean penality = true;
 
 	private double differenceThreshold = 0.2;
 	private double equalityThreshold = 0.9;
 	private double penalityFactor = -0.15;
 	
-	public EqualStemBoostingLabelSimilarity(IWordListSimilarity wordListSimilarity) {
-		this._wordListSimilarity = wordListSimilarity;
+	public EqualStemBoostingLabelSimilarity(ITokenListSimilarity wordListSimilarity) {
+		super(wordListSimilarity, new QGramsDistance(new TokeniserQGram3Extended()));
 	}
 	
-	public EqualStemBoostingLabelSimilarity(IWordListSimilarity wordListSimilarity, boolean penalize) {
-		this._wordListSimilarity = wordListSimilarity;
-		this._penalize = penalize;
+	public EqualStemBoostingLabelSimilarity(ITokenListSimilarity wordListSimilarity, boolean penality) {
+		super(wordListSimilarity, new QGramsDistance(new TokeniserQGram3Extended()));
+		this.penality = penality;
 	}
 	
 	@Override
 	public double computeLabelSimilarity(String label1, String label2) {
-		if (label1.toLowerCase().equals(label2.toLowerCase())) return 1.0;
-		List<String> wordList1 = TextProcessingUtils.tokenizeLabel2List(label1, true, true, 1);
-		List<String> wordList2 = TextProcessingUtils.tokenizeLabel2List(label2, true, true, 1);
-		if(wordList1.size() == 0 || wordList2.size() == 0){
+		
+		if (label1 == null || label2 == null)
+			return 0.0;
+		
+		label1 = label1.trim().toLowerCase();
+		label2 = label2.trim().toLowerCase();
+		if (label1.equals(label2))
+			return 1.0;
+		
+		List<String> wordList1 = TextProcessingUtils.tokenizeLabel2List(label1);
+		List<String> wordList2 = TextProcessingUtils.tokenizeLabel2List(label2);
+		if (wordList1.size() == 0 || wordList2.size() == 0){
 			return 0.0;
 		} 
 		
-		double wordLevel_sim = this._wordListSimilarity.computeSimilarity(wordList1, wordList2);
-		double similarity = wordLevel_sim;
+		double similarity = super.computeTokenListSimilarity(wordList1, wordList2);
+
+		// If similarity score is in the range of [differenceThreshold,
+		// equalityThreshold), we will check whether there is a chance that we
+		// can boost the similarity if the two labels have the same stem words
 		if (similarity >= this.equalityThreshold || similarity < differenceThreshold) {
 			return similarity;
 		}
-		
-		double boostingFactor = this.boosting(this._equalSemanticRootWordListSimilarity.computeSimilarity(wordList1, wordList2));
-		
-		if (boostingFactor == 0 && _penalize) {
+
+		double boostingFactor = this.boosting(stemWordBasedListSimilarity.computeSimilarity(wordList1, wordList2));
+		if (boostingFactor == 0 && penality) {
 			boostingFactor = penalityFactor;
 			return similarity + similarity * boostingFactor;
 		}

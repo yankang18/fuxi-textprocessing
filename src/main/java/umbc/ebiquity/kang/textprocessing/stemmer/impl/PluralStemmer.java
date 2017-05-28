@@ -3,10 +3,10 @@ package umbc.ebiquity.kang.textprocessing.stemmer.impl;
 import umbc.ebiquity.kang.textprocessing.stemmer.IStemmer;
 
 /**
- * This stemmer is only for plural. But, it is a useful, but not particularly
+ * This stemmer is only for plural. It is a useful, but not particularly
  * efficient plural stripper.
  * 
- * @author kangyan2003
+ * @author yankang
  */
 public class PluralStemmer implements IStemmer {
 

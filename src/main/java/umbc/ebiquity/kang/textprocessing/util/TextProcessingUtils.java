@@ -33,7 +33,6 @@ public class TextProcessingUtils {
 	private static Stopwords stopwords = new Stopwords(true);
 	private static Stopwords defaultStopwords = new Stopwords(true);
 	private static Stopwords webpageStopwords = new Stopwords(false);
-//	private static 
 	static {
 		try {
 			stopwords.read();
@@ -66,7 +65,7 @@ public class TextProcessingUtils {
 	}
 	
 	public static String getProcessedLabel(String label, String spliter) {
-		String[] tokens = TextProcessingUtils.tokenizeLabel(TextProcessingUtils.removeStopwords(label.toLowerCase()));
+		String[] tokens = TextProcessingUtils.tokenize(TextProcessingUtils.removeStopwords(label.toLowerCase()));
 		StringBuilder processedTermLabelSB = new StringBuilder();
 		for (String token : tokens) {
 			processedTermLabelSB.append(token + spliter);
@@ -75,7 +74,7 @@ public class TextProcessingUtils {
 	}
 
 	public static String getProcessedLabel2(String label, String spliter) {
-		String[] tokens = TextProcessingUtils.tokenizeLabel(label);
+		String[] tokens = TextProcessingUtils.tokenize(label);
 		StringBuilder processedTermLabelSB = new StringBuilder();
 		for (String token : tokens) {
 			processedTermLabelSB.append(token + spliter);
@@ -84,7 +83,7 @@ public class TextProcessingUtils {
 	}
 	
 	public static String getProcessedLabelWithStemming(String label, String delimer) {
-		String[] tokens = TextProcessingUtils.tokenizeLabel(label);
+		String[] tokens = TextProcessingUtils.tokenize(label);
 		StringBuilder processedTermLabelSB = new StringBuilder();
 		for (String token : tokens) {
 			token = token.toLowerCase();
@@ -99,7 +98,7 @@ public class TextProcessingUtils {
 		label = label.replaceAll("[();:\"'.,]", "");
 		defaultStopwords.remove("and");
 		List<String> wordList = new ArrayList<String>();
-		String[] tokens = TextProcessingUtils.tokenizeLabel(label);
+		String[] tokens = TextProcessingUtils.tokenize(label);
 		for (String token : tokens) {
 			token = token.toLowerCase();
 			if (!defaultStopwords.is(token)) {
@@ -111,7 +110,7 @@ public class TextProcessingUtils {
 	}
 	
 	public static String getProcessedLabel2WithStemming(String label, String delimer) {
-		String[] tokens = TextProcessingUtils.tokenizeLabel(label);
+		String[] tokens = TextProcessingUtils.tokenize(label);
 		StringBuilder processedTermLabelSB = new StringBuilder();
 		for (String token : tokens) {
 			processedTermLabelSB.append(pluralStemmer.stem(token.toLowerCase()) + delimer); 
@@ -120,32 +119,102 @@ public class TextProcessingUtils {
 	}
 	
 	public static String[] getTokensWithStemming(String label) {
-		return tokenizeLabel(getProcessedLabelWithStemming(label, " "));
+		return tokenize(getProcessedLabelWithStemming(label, " "));
+	}
+
+	/**
+	 * Tokenizes the specified label and perform stemming and removing stop
+	 * words based on the default stop-word dictionary on each token. Finally,
+	 * concatenating all the tokens into a string.
+	 * 
+	 * @param label
+	 *            the label to be processed
+	 * @return a string representing the label after the process
+	 */
+	public static String process(String label) {
+		return process(label, true, true, true);
 	}
 	
-	public static String tokenizeLabel2String(String label, boolean stemming, boolean removeStopWords, int flag){
+	/**
+	 * Tokenizes the specified label and perform optionally stemming or
+	 * optionally removing stop words on each token. Finally, concatenating all
+	 * the tokens into a string.
+	 * 
+	 * @param label
+	 *            the label to be processed
+	 * @param stemming
+	 *            if true each word in the label will be stemmed
+	 * @param removeStopWords
+	 *            if true stop words will be removed
+	 * @param usingDefaultStopwords
+	 *            if true default stop words dictionary will be used to remove
+	 *            stop words
+	 * @return a string representing the label after the process
+	 */
+	public static String process(String label, boolean stemming, boolean removeStopWords, boolean usingDefaultStopwords){
 		StringBuilder sb = new StringBuilder(); 
-		for(String token : tokenizeLabel2List(label, stemming, removeStopWords, flag).toArray(new String[0])){
+		for(String token : tokenizeLabel2List(label, stemming, removeStopWords, usingDefaultStopwords).toArray(new String[0])){
 			sb.append(token + " ");
 		}
 		return sb.toString().trim();
 	}
 	
-	
-	public static String[] tokenizeLabel2Array(String label, boolean stemming, boolean removeStopWords, int flag){
-		return tokenizeLabel2List(label, stemming, removeStopWords, flag).toArray(new String[0]);
+	/**
+	 * Tokenizes the specified label and perform optionally stemming or
+	 * optionally removing stop words on each token.
+	 * 
+	 * @param label
+	 *            the label to be processed
+	 * @param stemming
+	 *            if true each word in the label will be stemmed
+	 * @param removeStopWords
+	 *            if true stop words will be removed
+	 * @param usingDefaultStopwords
+	 *            if true default stop words dictionary will be used to remove
+	 *            stop words
+	 * @return a array of token
+	 */
+	public static String[] tokenizeLabel2Array(String label, boolean stemming, boolean removeStopWords,
+			boolean usingDefaultStopwords) {
+		return tokenizeLabel2List(label, stemming, removeStopWords, usingDefaultStopwords).toArray(new String[0]);
 	}
-	
-	public static List<String> tokenizeLabel2List(String label, boolean stemming, boolean removeStopWords, int flag){
+
+	/**
+	 * Tokenizes the specified label and perform stemming and removing stop
+	 * words based on the default stop-word dictionary on each token.
+	 * 
+	 * @param label
+	 *            the label to be processed
+	 */
+	public static List<String> tokenizeLabel2List(String label) {
+		return tokenizeLabel2List(label, true, true, true);
+	}
+
+	/**
+	 * Tokenizes the specified label and perform optionally stemming or
+	 * optionally removing stop words on each token.
+	 * 
+	 * @param label
+	 *            the label to be processed
+	 * @param stemming
+	 *            if true each word in the label will be stemmed
+	 * @param removeStopWords
+	 *            if true stop words will be removed
+	 * @param usingDefaultStopwords
+	 *            if true default stop words dictionary will be used to remove
+	 *            stop words
+	 * @return a List of token
+	 */
+	public static List<String> tokenizeLabel2List(String label, boolean stemming, boolean removeStopWords, boolean usingDefaultStopwords){
 		Stopwords stopWords;
-		if(flag == 0){ 
+		if(usingDefaultStopwords){ 
 			stopWords = defaultStopwords;
 		}
 		else {
 			stopWords = stopwords;
 		}
 		
-		String[] tokens = TextProcessingUtils.tokenizeLabel(label);
+		String[] tokens = TextProcessingUtils.tokenize(label);
 		ArrayList<String> newTokens = new ArrayList<String>();
 		for (String token : tokens) {
 			token = token.toLowerCase();
@@ -196,7 +265,7 @@ public class TextProcessingUtils {
 	public static int getWordCount(String label) {
 
 		int count = 0;
-		String[] tokens = TextProcessingUtils.tokenizeLabel(label);
+		String[] tokens = TextProcessingUtils.tokenize(label);
 		for (String token : tokens) {
 			token = token.toLowerCase();
 			if (!stopwords.is(token)) {
@@ -207,7 +276,7 @@ public class TextProcessingUtils {
 	}
 
 	public static String getProcessedLabelWithoutStemming(String label, String delimer) {
-		String[] tokens = TextProcessingUtils.tokenizeLabel(label);
+		String[] tokens = TextProcessingUtils.tokenize(label);
 		StringBuilder processedTermLabelSB = new StringBuilder();
 		for (String token : tokens) {
 			token = token.toLowerCase();
@@ -218,7 +287,7 @@ public class TextProcessingUtils {
 		return processedTermLabelSB.toString().trim();
 	}
 	
-	public static String[] tokenizeLabel(String label) {
+	public static String[] tokenize(String label) {
 		try {
 			logger.entering("TextProcessingUtils", "StringTokenizer", label);
 			/**
@@ -404,11 +473,11 @@ public class TextProcessingUtils {
 		return returnStringBuilder.toString().trim();
 
 	}
-	
-	public static boolean isStringEmpty(String original){
-		if(original.replaceAll("\u00a0"," ").replaceAll("&nbsp;", " ").trim().equals("")){
+
+	public static boolean isStringEmpty(String original) {
+		if (original != null && original.replaceAll("\u00a0", " ").replaceAll("&nbsp;", " ").trim().equals("")) {
 			return true;
-		}else {
+		} else {
 			return false;
 		}
 	}
@@ -424,7 +493,7 @@ public class TextProcessingUtils {
 	 */
 	public static boolean isDescription(String text) {
 
-		int numOfWords = TextProcessingUtils.tokenizeLabel(text.trim()).length;
+		int numOfWords = TextProcessingUtils.tokenize(text.trim()).length;
 		if (numOfWords > 7) {
 			return true;
 		} else {
@@ -446,7 +515,7 @@ public class TextProcessingUtils {
 //			System.out.println(phrase);
 //		}
 
-		String[] tokens = TextProcessingUtils.tokenizeLabel("WaterjetCuttings");
+		String[] tokens = TextProcessingUtils.tokenize("WaterjetCuttings");
 		for(String token : tokens){
 		System.out.println("--" + token);
 		}

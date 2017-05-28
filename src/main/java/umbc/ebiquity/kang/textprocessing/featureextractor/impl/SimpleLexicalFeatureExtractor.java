@@ -48,7 +48,7 @@ public class SimpleLexicalFeatureExtractor implements ILexicalFeatureExtractor {
 		if (_removeStopwords) {
 			processedLabel = TextProcessingUtils.removeStopwords2(label);
 		}
-		return TextProcessingUtils.tokenizeLabel(processedLabel);
+		return TextProcessingUtils.tokenize(processedLabel);
 	}
 
 	// TODO: should move this method to other class for applying Single
@@ -104,7 +104,7 @@ public class SimpleLexicalFeatureExtractor implements ILexicalFeatureExtractor {
 			String processedLabel = TextProcessingUtils.removeStopwords2(wordSet);
 			if (processedLabel.equals(""))
 				continue;
-			String[] tokens = TextProcessingUtils.tokenizeLabel(processedLabel.trim());
+			String[] tokens = TextProcessingUtils.tokenize(processedLabel.trim());
 			Collection<Phrase> phrases = phraseExtractor.extractPhrases(tokens, tokens.length);
 			for (Phrase p : phrases) {
 				if (!phraseCollection.contains(p.getLabel())) {

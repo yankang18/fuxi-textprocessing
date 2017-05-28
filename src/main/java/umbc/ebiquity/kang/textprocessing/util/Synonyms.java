@@ -36,7 +36,6 @@ public class Synonyms {
 	public static void load(String[] paths) {
 		for (String path : paths) {
 			load(path);
-
 		}
 	}
 

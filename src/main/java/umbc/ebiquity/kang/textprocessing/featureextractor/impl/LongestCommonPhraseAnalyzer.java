@@ -40,7 +40,7 @@ public class LongestCommonPhraseAnalyzer {
 			String processedLabel = TextProcessingUtils.removeStopwords2(entity.getLabel());
 			if (processedLabel.equals(""))
 				continue;
-			String[] tokens = TextProcessingUtils.tokenizeLabel(processedLabel.trim());
+			String[] tokens = TextProcessingUtils.tokenize(processedLabel.trim());
 			
 			double score = 1.0;
 			for (String oneWordPhrase : phraseExtractor.extractPhraseStrings(tokens, 1)) {
